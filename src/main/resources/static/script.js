@@ -283,7 +283,7 @@ function displayResults(result, points) {
     let targetInterval = null;
     const splineFunctions = addResultSection('Spline Functions');
     const splineRows = mathGroup(splineFunctions);
-    splineRows.classList.add('equation-group-spaced', 'equation-group-start-spaced');
+    splineRows.classList.add('spline-function-list', 'equation-group-start-spaced');
     splineRows.parentElement.classList.add('equation-scroll-end-spaced');
     result.intervals.forEach((interval, index) => {
       if (interval.containsTarget) targetInterval = interval;
@@ -295,10 +295,16 @@ function displayResults(result, points) {
       functionRhs.append(document.createTextNode(`(${leftY}) + (${slope})(x − ${leftX})`));
       const intervalLabel = mathText(`${formatNumber(interval.xStart)} ≤ x ≤ ${formatNumber(interval.xEnd)}`);
       intervalLabel.className = 'spline-interval';
-      functionRhs.append(intervalLabel);
+      const intervalGroup = document.createElement('div');
+      intervalGroup.className = 'spline-interval-group';
+      intervalGroup.append(intervalLabel);
+      const intervalEquation = document.createElement('div');
+      intervalEquation.className = 'equation-group spline-interval-equation';
+      intervalGroup.append(intervalEquation);
+      splineRows.append(intervalGroup);
       const functionLabel = mathSub('f', index + 1);
       functionLabel.append(document.createTextNode('(x)'));
-      addEquation(splineRows, functionLabel, functionRhs);
+      addEquation(intervalEquation, functionLabel, functionRhs);
     });
     if (targetInterval && result.targetX != null && result.value != null) {
       const leftPoint = sortedPoints.find(point => point.x === targetInterval.xStart);
