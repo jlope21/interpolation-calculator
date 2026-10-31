@@ -23,7 +23,7 @@
 body { min-height: 100vh; margin: 0; background: #F8FAF6; color: var(--ink); }
 .topbar { height: 62px; padding: 0 max(21px, calc((100% - 1040px) / 2)); display: flex; align-items: center; background: #FFFFFF; border-bottom: 1px solid var(--border); }
 .wordmark { color: #55705B; font-size: 13.2px; font-weight: 700; letter-spacing: 2px; transform: translateX(-4px); }
-.page-shell { width: min(1040px, calc(100% - 32px)); margin: 0 auto; padding: 27px 0 38px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "calculate results" "points results"; align-items: stretch; gap: 13px 18px; }
+.page-shell { width: min(1040px, calc(100% - 32px)); margin: 0 auto; padding: 27px 0 38px; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); grid-template-areas: "calculate results" "points results"; align-items: stretch; gap: 13px 18px; }
 .card { background: #FFFFFF; border: 1px solid var(--border); border-radius: 17px; }
 .card h1, .card h2 { margin: 0; color: var(--ink); font: 700 16.8px Manrope, sans-serif; letter-spacing: -.2px; }
 .controls-card { grid-area: calculate; padding: 21px 23.5px 22.4px; }
@@ -90,6 +90,11 @@ tbody tr:hover .delete-row, .delete-row:focus-visible { opacity: 1; transform: t
 .result-divider { flex: 0 0 1px; width: 100%; margin: 9px 0 0; border-top: 1px solid var(--border); }
 .math-scroll { width: 100%; min-width: 0; max-width: 100%; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
 .equation-group { display: grid; width: max-content; min-width: max-content; grid-template-columns: max-content 1.1em max-content; align-items: baseline; column-gap: 7.5px; row-gap: 5.3px; color: #385342; font: 16.6px/1.65 'DM Sans', sans-serif; white-space: nowrap; }
+.equation-group.equation-group-wrap { width: 100%; min-width: 0; grid-template-columns: max-content 1.1em minmax(0, 1fr); row-gap: .45em; line-height: 1.8; white-space: normal; }
+.equation-group-wrap .equation-cell, .equation-group-wrap .equation-cell * { white-space: normal; }
+.equation-group-wrap .equation-rhs { min-width: 0; padding-left: .35em; text-indent: 0; }
+.equation-group-wrap .equation-atom { display: inline-block; white-space: nowrap; }
+.equation-group-wrap .equation-atom * { white-space: nowrap; }
 .equation-group-spaced { row-gap: .75em; }
 .lagrange-basis-list { display: flex; width: max-content; min-width: max-content; flex-direction: column; align-items: flex-start; gap: .75em; }
 .lagrange-basis-entry { row-gap: 0; }

@@ -93,7 +93,7 @@ function clearResults() {
 
 function addResultSection(title) {
   const section = document.createElement('section');
-  section.className = 'result-section';
+  section.className = `result-section${title === 'Final Result' ? ' final-result-section' : ''}`;
   const heading = document.createElement('h3');
   heading.className = 'result-heading';
   heading.textContent = title;
@@ -115,12 +115,14 @@ function mathText(value) {
   return span;
 }
 
-function appendInlineResult(expression, value) {
-  expression.append(document.createTextNode(' = '));
-  const finalValue = mathText(formatNumber(value));
-  finalValue.className = 'equation-final';
-  expression.append(finalValue);
-  return expression;
+function appendEquationAtom(parent, operator, ...contents) {
+  if (parent.childNodes.length) parent.append(document.createElement('wbr'));
+  const atom = document.createElement('span');
+  atom.className = 'equation-atom';
+  if (operator) atom.append(document.createTextNode(`${operator} `));
+  atom.append(...contents);
+  parent.append(atom);
+  return atom;
 }
 
 function mathSub(base, index) {
@@ -137,6 +139,7 @@ function mathGroup(section) {
   scroll.className = 'math-scroll';
   const group = document.createElement('div');
   group.className = 'equation-group';
+  if (section.classList.contains('final-result-section')) group.classList.add('equation-group-wrap');
   scroll.append(group);
   section.append(scroll);
   return group;
@@ -153,6 +156,13 @@ function addEquation(group, lhs, rhs, options = {}) {
   right.className = `equation-cell equation-rhs${options.emphasis ? ' equation-final' : ''}`;
   if (rhs) right.append(rhs);
   group.append(left, equals, right);
+}
+
+function addEvaluatedEquation(group, lhs, expression, value) {
+  addEquation(group, lhs, expression);
+  const answer = mathText(formatNumber(value));
+  answer.className = 'equation-final';
+  addEquation(group, null, answer, { emphasis: true });
 }
 
 function mathProduct(factors) {
@@ -180,10 +190,17 @@ function mathFraction(numerator, denominator) {
 function polynomialTerms(coefficients, points, substituteX = null) {
   const terms = document.createElement('span');
   coefficients.forEach((coefficient, index) => {
-    if (index) terms.append(document.createTextNode(' + '));
-    terms.append(document.createTextNode(`(${formatNumber(coefficient)})`));
-    for (let factor = 0; factor < index; factor++) {
-      terms.append(document.createTextNode(`(${substituteX == null ? 'x' : formatNumber(substituteX)} − ${formatNumber(points[factor].x)})`));
+    const coefficientGroup = mathText(`(${formatNumber(coefficient)})`);
+    let firstFactor = 0;
+    if (index > 0) {
+      const factor = mathText(` (${substituteX == null ? 'x' : formatNumber(substituteX)} − ${formatNumber(points[0].x)})`);
+      appendEquationAtom(terms, '+', coefficientGroup, factor);
+      firstFactor = 1;
+    } else {
+      appendEquationAtom(terms, '', coefficientGroup);
+    }
+    for (let factor = firstFactor; factor < index; factor++) {
+      appendEquationAtom(terms, '', mathText(` (${substituteX == null ? 'x' : formatNumber(substituteX)} − ${formatNumber(points[factor].x)})`));
     }
   });
   return terms;
@@ -203,10 +220,9 @@ function lagrangeBasisExpression(index, points, targetX) {
 function lagrangeSymbolicSum(points) {
   const sum = document.createElement('span');
   points.forEach((point, index) => {
-    if (index) sum.append(document.createTextNode(' + '));
     const functionValue = document.createElement('span');
     functionValue.append(document.createTextNode('f('), mathSub('x', index), document.createTextNode(')'));
-    sum.append(mathSub('L', index), functionValue);
+    appendEquationAtom(sum, index ? '+' : '', mathSub('L', index), functionValue);
   });
   return sum;
 }
@@ -230,7 +246,7 @@ function displayResults(result, points) {
     const evaluatedRows = mathGroup(evaluated);
     addEquation(evaluatedRows, mathText('f(x)'), polynomialTerms(result.coefficients, points));
     if (result.value != null) {
-      addEquation(evaluatedRows, mathText(`f(${formatNumber(result.targetX)})`), appendInlineResult(polynomialTerms(result.coefficients, points, result.targetX), result.value));
+      addEvaluatedEquation(evaluatedRows, mathText(`f(${formatNumber(result.targetX)})`), polynomialTerms(result.coefficients, points, result.targetX), result.value);
     }
   } else if (result.mode === 'lagrange') {
     if (result.targetX != null) {
@@ -254,10 +270,9 @@ function displayResults(result, points) {
     if (result.value != null) {
       const substituted = document.createElement('span');
       points.forEach((point, index) => {
-        if (index) substituted.append(document.createTextNode(' + '));
-        substituted.append(document.createTextNode(`(${formatNumber(result.basisFunctions[index].valueAtTarget)})(${formatNumber(point.y)})`));
+        appendEquationAtom(substituted, index ? '+' : '', mathText(`(${formatNumber(result.basisFunctions[index].valueAtTarget)}) (${formatNumber(point.y)})`));
       });
-      addEquation(evaluatedRows, mathText(`f(${formatNumber(result.targetX)})`), appendInlineResult(substituted, result.value));
+      addEvaluatedEquation(evaluatedRows, mathText(`f(${formatNumber(result.targetX)})`), substituted, result.value);
     }
   } else {
     const sortedPoints = [...points].sort((left, right) => left.x - right.x);
@@ -285,8 +300,10 @@ function displayResults(result, points) {
       const targetText = formatNumber(result.targetX);
       const evaluated = addResultSection('Final Result');
       const evaluatedRows = mathGroup(evaluated);
-      const substitution = mathText(`(${formatNumber(leftPoint.y)}) + (${formatNumber(targetInterval.slope)})(${targetText} − ${formatNumber(targetInterval.xStart)})`);
-      addEquation(evaluatedRows, mathText(`f(${targetText})`), appendInlineResult(substitution, result.value));
+      const substitution = document.createElement('span');
+      appendEquationAtom(substitution, '', mathText(`(${formatNumber(leftPoint.y)})`));
+      appendEquationAtom(substitution, '+', mathText(`(${formatNumber(targetInterval.slope)}) (${targetText} − ${formatNumber(targetInterval.xStart)})`));
+      addEvaluatedEquation(evaluatedRows, mathText(`f(${targetText})`), substitution, result.value);
     }
   }
   resultContent.hidden = false;
