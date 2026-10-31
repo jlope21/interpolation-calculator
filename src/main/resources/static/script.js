@@ -1,11 +1,14 @@
 const modeSelect = document.querySelector('#mode');
 const methodSelect = document.querySelector('#method');
 const pointsBody = document.querySelector('#points-body');
+const pointsCard = document.querySelector('.points-card');
 const pointCount = document.querySelector('#point-count');
 const selectAll = document.querySelector('#select-all');
 const resultContent = document.querySelector('#results-content');
+const resultEmpty = document.querySelector('#results-empty');
 const targetInput = document.querySelector('#target-x');
 const calculateButton = document.querySelector('#calculate');
+const pointUndoStack = [];
 
 const methods = {
   newton: ['Linear', 'Quadratic', 'Polynomial'],
@@ -13,7 +16,7 @@ const methods = {
   spline: ['Linear']
 };
 
-function addPoint(x = '', y = '', selected = false) {
+function addPoint(x = '', y = '', selected = false, recordUndo = false) {
   const row = document.createElement('tr');
   row.innerHTML = `<td class="check-col"><input class="point-check" type="checkbox" aria-label="Select data point"></td>
     <td><input class="point-value" type="number" step="any" placeholder="0.00" aria-label="X value"></td>
@@ -21,9 +24,11 @@ function addPoint(x = '', y = '', selected = false) {
     <td class="actions-col"><button class="delete-row" type="button" aria-label="Delete data point" title="Delete row">−</button></td>`;
   row.querySelectorAll('.point-value')[0].value = x;
   row.querySelectorAll('.point-value')[1].value = y;
+  row.querySelectorAll('.point-value').forEach(input => { input.dataset.undoValue = input.value; });
   row.querySelector('.point-check').checked = selected;
   pointsBody.append(row);
   updateRows();
+  if (recordUndo) pointUndoStack.push({ type: 'add', row });
 }
 
 function updateRows() {
@@ -33,6 +38,42 @@ function updateRows() {
   selectAll.checked = checkboxes.length > 0 && selectedCount === checkboxes.length;
   selectAll.indeterminate = selectedCount > 0 && selectedCount < checkboxes.length;
   [...pointsBody.rows].forEach(row => row.classList.toggle('selected', row.querySelector('.point-check').checked));
+}
+
+function commitPointEdit(input) {
+  const previousValue = input.dataset.undoValue ?? '';
+  const currentValue = input.value;
+  if (currentValue === previousValue) return;
+
+  pointUndoStack.push({ type: 'edit', input, previousValue, currentValue });
+  input.dataset.undoValue = currentValue;
+}
+
+function focusPointAt(index) {
+  const row = pointsBody.rows[Math.min(index, pointsBody.rows.length - 1)];
+  if (row) row.querySelector('.point-value').focus();
+  else document.querySelector('#add-row').focus();
+}
+
+function undoPointAction() {
+  const action = pointUndoStack.pop();
+  if (!action) return;
+
+  if (action.type === 'edit') {
+    action.input.value = action.previousValue;
+    action.input.dataset.undoValue = action.previousValue;
+  } else if (action.type === 'add') {
+    const index = [...pointsBody.rows].indexOf(action.row);
+    const focusRemovedRow = action.row.contains(document.activeElement);
+    action.row.remove();
+    updateRows();
+    if (focusRemovedRow) focusPointAt(index);
+  } else if (action.type === 'delete') {
+    pointsBody.insertBefore(action.row, pointsBody.rows[action.index] || null);
+    updateRows();
+    action.row.querySelector('.point-value').focus();
+  }
+  clearResults();
 }
 
 function updateMethods() {
@@ -176,6 +217,7 @@ function formatNumber(value) {
 
 function displayResults(result, points) {
   clearResults();
+  resultEmpty.hidden = true;
   if (result.mode === 'newton') {
     const coefficientRows = mathGroup(resultContent);
     coefficientRows.classList.add('equation-group-spaced');
@@ -252,6 +294,7 @@ function displayResults(result, points) {
 
 function showError(message) {
   clearResults();
+  resultEmpty.hidden = true;
   const error = document.createElement('p');
   error.className = 'result-error';
   error.setAttribute('role', 'alert');
@@ -320,15 +363,84 @@ modeSelect.addEventListener('change', updateMethods);
 methodSelect.addEventListener('change', clearResults);
 pointsBody.addEventListener('change', event => {
   if (event.target.matches('.point-check')) updateRows();
+  if (event.target.matches('.point-value')) commitPointEdit(event.target);
 });
 pointsBody.addEventListener('input', event => {
   if (event.target.matches('.point-value')) clearResults();
 });
+pointsBody.addEventListener('keydown', event => {
+  if (!event.target.matches('.point-value')) return;
+
+  const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  if (arrowKeys.includes(event.key)) {
+    event.preventDefault();
+    const currentRow = event.target.closest('tr');
+    const rowInputs = [...currentRow.querySelectorAll('.point-value')];
+    const columnIndex = rowInputs.indexOf(event.target);
+    let destination = null;
+
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const horizontalOffset = event.key === 'ArrowLeft' ? -1 : 1;
+      destination = rowInputs[columnIndex + horizontalOffset] || null;
+    } else {
+      if (event.key === 'ArrowDown' && !currentRow.nextElementSibling) {
+        if (!event.repeat) {
+          commitPointEdit(event.target);
+          addPoint('', '', false, true);
+          clearResults();
+          pointsBody.lastElementChild.querySelectorAll('.point-value')[columnIndex].focus();
+        }
+        return;
+      }
+
+      const verticalOffset = event.key === 'ArrowUp' ? -1 : 1;
+      let destinationRow = currentRow;
+      for (let step = 0; step < Math.abs(verticalOffset); step++) {
+        destinationRow = verticalOffset < 0 ? destinationRow.previousElementSibling : destinationRow.nextElementSibling;
+      }
+      destination = destinationRow?.querySelectorAll('.point-value')[columnIndex] || null;
+    }
+
+    destination?.focus();
+    return;
+  }
+
+  if (event.key !== 'Enter') return;
+  event.preventDefault();
+
+  const currentRow = event.target.closest('tr');
+  const rowInputs = currentRow.querySelectorAll('.point-value');
+  if (event.target === rowInputs[0]) {
+    rowInputs[1].focus();
+    return;
+  }
+
+  const nextRow = currentRow.nextElementSibling;
+  if (nextRow) {
+    nextRow.querySelector('.point-value').focus();
+    return;
+  }
+
+  commitPointEdit(event.target);
+  addPoint('', '', false, true);
+  clearResults();
+  pointsBody.lastElementChild.querySelector('.point-value').focus();
+});
+pointsCard.addEventListener('keydown', event => {
+  if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return;
+  event.preventDefault();
+  if (event.target.matches('.point-value')) commitPointEdit(event.target);
+  undoPointAction();
+});
 pointsBody.addEventListener('click', event => {
   const deleteButton = event.target.closest('.delete-row');
   if (!deleteButton) return;
-  deleteButton.closest('tr').remove();
+  const row = deleteButton.closest('tr');
+  const index = [...pointsBody.rows].indexOf(row);
+  pointUndoStack.push({ type: 'delete', row, index });
+  row.remove();
   updateRows();
+  focusPointAt(index);
   clearResults();
 });
 selectAll.addEventListener('change', () => {
@@ -337,7 +449,7 @@ selectAll.addEventListener('change', () => {
   clearResults();
 });
 document.querySelector('#add-row').addEventListener('click', () => {
-  addPoint();
+  addPoint('', '', false, true);
   clearResults();
 });
 calculateButton.addEventListener('click', calculate);

@@ -21,12 +21,12 @@
 
 * { box-sizing: border-box; }
 body { min-height: 100vh; margin: 0; background: #F8FAF6; color: var(--ink); }
-.topbar { height: 62px; padding: 0 max(21px, calc((100% - 620px) / 2)); display: flex; align-items: center; background: #FFFFFF; border-bottom: 1px solid var(--border); }
-.wordmark { color: #55705B; font-size: 11.9px; font-weight: 700; letter-spacing: 2px; }
-.page-shell { width: min(620px, calc(100% - 32px)); margin: 0 auto; padding: 27px 0 38px; display: flex; flex-direction: column; gap: 13px; }
+.topbar { height: 62px; padding: 0 max(21px, calc((100% - 1040px) / 2)); display: flex; align-items: center; background: #FFFFFF; border-bottom: 1px solid var(--border); }
+.wordmark { color: #55705B; font-size: 13.2px; font-weight: 700; letter-spacing: 2px; transform: translateX(-4px); }
+.page-shell { width: min(1040px, calc(100% - 32px)); margin: 0 auto; padding: 27px 0 38px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "calculate results" "points results"; align-items: stretch; gap: 13px 18px; }
 .card { background: #FFFFFF; border: 1px solid var(--border); border-radius: 17px; }
 .card h1, .card h2 { margin: 0; color: var(--ink); font: 700 16.8px Manrope, sans-serif; letter-spacing: -.2px; }
-.controls-card { padding: 21px 23.5px 22.4px; }
+.controls-card { grid-area: calculate; padding: 21px 23.5px 22.4px; }
 .controls-card h1 { margin-bottom: 15px; }
 .select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 .field-label { display: flex; flex-direction: column; gap: 7.2px; color: #55705B; font-size: 11.9px; font-weight: 600; }
@@ -48,7 +48,7 @@ body { min-height: 100vh; margin: 0; background: #F8FAF6; color: var(--ink); }
 .button-primary { width: calc((100% - 15px) / 2); min-width: 0; height: 45px; border: 1px solid var(--green); background: var(--green); color: #385342; }
 .button-primary:hover { border-color: var(--green-dark); background: var(--green-dark); }
 .button-primary:disabled { opacity: .65; cursor: wait; }
-.points-card { padding: 20px 23.5px 15.7px; }
+.points-card { grid-area: points; padding: 20px 23.5px 15.7px; }
 .section-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .point-count { padding: 6px 10.6px; border-radius: 23px; background: var(--green-soft); color: #55705B; font-size: 11.9px; }
 .table-frame { overflow: hidden; border: 1px solid var(--border); border-radius: 12px; }
@@ -76,7 +76,11 @@ tbody tr:hover .delete-row, .delete-row:focus-visible { opacity: 1; transform: t
 .button-secondary { height: 37px; border: 1px solid #DEE8DC; background: #FFFFFF; color: #385342; padding: 0 13.5px; }
 .button-secondary:hover { border-color: #72B982; background: var(--green-soft); }
 .plus { margin-right: 3.6px; color: var(--green-dark); font-size: 18px; line-height: 0; vertical-align: -1px; }
-.results-card { min-width: 0; min-height: 66px; padding: 20px 23.5px; }
+.results-card { grid-area: results; display: flex; min-width: 0; min-height: 66px; flex-direction: column; padding: 20px 23.5px; max-height: calc(100vh - 127px); overflow-y: auto; }
+.results-empty { display: flex; flex: 1; min-height: 220px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 10px; text-align: center; }
+.results-empty[hidden] { display: none; }
+.results-empty-title, .results-empty-support { margin: 0; }
+.results-empty-title { color: #9AA39A; font: 500 14px 'DM Sans', sans-serif; }
 .results-content[hidden] { display: none; }
 .results-content { display: flex; min-width: 0; flex-direction: column; margin-top: 14px; border-top: 1px solid var(--border); }
 .result-section { width: 100%; min-width: 0; padding: 12px 0; border-bottom: 1px solid var(--border); }
@@ -101,6 +105,11 @@ tbody tr:hover .delete-row, .delete-row:focus-visible { opacity: 1; transform: t
 .equation-cell sub { font-size: .72em; line-height: 0; vertical-align: sub; }
 .result-error { margin: 0; padding: 10.6px 0 0; color: #9a5751; font-size: 14.2px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 860px) {
+  .page-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "calculate" "points" "results"; }
+  .results-card { max-height: none; overflow-y: visible; }
+}
 
 @media (max-width: 520px) {
   .topbar { height: 57px; padding: 0 18px; }
