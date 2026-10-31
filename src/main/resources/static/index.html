@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAFBF8">
+  <title>Interpolation Calculator</title>
+  <link rel="stylesheet" href="style.css?v=calculator-10">
+  <script src="script.js?v=calculator-8" defer></script>
+</head>
+<body>
+  <header class="topbar"><span class="wordmark">INTERPOLATION</span></header>
+  <main class="page-shell">
+    <section class="card controls-card" aria-labelledby="controls-title">
+      <h1 id="controls-title">Calculate</h1>
+      <div class="select-grid">
+        <label class="field-label" for="mode">Mode
+          <span class="select-wrap"><select id="mode"><option value="newton">Newton</option><option value="lagrange">Lagrange</option><option value="spline">Spline</option></select><span class="chevron" aria-hidden="true"></span></span>
+        </label>
+        <label class="field-label" for="method">Method
+          <span class="select-wrap"><select id="method"></select><span class="chevron" aria-hidden="true"></span></span>
+        </label>
+      </div>
+      <div class="calculate-row">
+        <label class="field-label target-field" for="target-x">Target X
+          <span class="input-wrap"><input id="target-x" type="number" step="any" placeholder="Enter x"></span>
+        </label>
+        <button type="button" class="button button-primary" id="calculate">Calculate</button>
+      </div>
+    </section>
+
+    <section class="card points-card" aria-labelledby="points-title">
+      <div class="section-top"><h2 id="points-title">Data Points</h2><span class="point-count" id="point-count">3 points</span></div>
+      <div class="table-frame">
+        <table>
+          <thead><tr><th class="check-col"><span class="sr-only">Select all points</span></th><th>X</th><th>Y</th><th class="actions-col"><span class="sr-only">Delete row</span></th></tr></thead>
+          <tbody id="points-body"></tbody>
+        </table>
+      </div>
+      <div class="points-actions">
+        <label class="select-all"><input id="select-all" type="checkbox"><span>Select all</span></label>
+        <button type="button" class="button button-secondary" id="add-row"><span class="plus" aria-hidden="true">+</span> Add row</button>
+      </div>
+    </section>
+
+    <section class="card results-card" aria-labelledby="results-title" aria-live="polite">
+      <h2 id="results-title">Results</h2>
+      <div id="results-content" class="results-content" hidden></div>
+    </section>
+  </main>
+</body>
+</html>
