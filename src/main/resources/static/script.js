@@ -236,7 +236,8 @@ function displayResults(result, points) {
   resultEmpty.hidden = true;
   if (result.mode === 'newton') {
     const coefficientRows = mathGroup(resultContent);
-    coefficientRows.classList.add('equation-group-spaced');
+    coefficientRows.classList.add('equation-group-spaced', 'equation-group-start-spaced');
+    coefficientRows.parentElement.classList.add('equation-scroll-end-spaced');
     result.coefficients.forEach((value, index) => {
       addEquation(coefficientRows, mathSub('C', index), mathText(formatNumber(value)));
     });
@@ -244,6 +245,7 @@ function displayResults(result, points) {
 
     const evaluated = addResultSection('Final Result');
     const evaluatedRows = mathGroup(evaluated);
+    evaluatedRows.classList.add('equation-group-start-spaced', 'equation-group-final-indent');
     addEquation(evaluatedRows, mathText('f(x)'), polynomialTerms(result.coefficients, points));
     if (result.value != null) {
       addEvaluatedEquation(evaluatedRows, mathText(`f(${formatNumber(result.targetX)})`), polynomialTerms(result.coefficients, points, result.targetX), result.value);
@@ -251,7 +253,8 @@ function displayResults(result, points) {
   } else if (result.mode === 'lagrange') {
     if (result.targetX != null) {
       const basisRows = mathGroup(resultContent);
-      basisRows.classList.add('lagrange-basis-list');
+      basisRows.classList.add('lagrange-basis-list', 'equation-group-start-spaced');
+      basisRows.parentElement.classList.add('equation-scroll-end-spaced');
       result.basisFunctions.forEach(basis => {
         if (basis.valueAtTarget != null) {
           const basisGroup = document.createElement('div');
@@ -266,6 +269,7 @@ function displayResults(result, points) {
 
     const evaluated = addResultSection('Final Result');
     const evaluatedRows = mathGroup(evaluated);
+    evaluatedRows.classList.add('equation-group-start-spaced', 'equation-group-final-indent');
     addEquation(evaluatedRows, mathText('f(x)'), lagrangeSymbolicSum(points));
     if (result.value != null) {
       const substituted = document.createElement('span');
@@ -279,7 +283,8 @@ function displayResults(result, points) {
     let targetInterval = null;
     const splineFunctions = addResultSection('Spline Functions');
     const splineRows = mathGroup(splineFunctions);
-    splineRows.classList.add('equation-group-spaced');
+    splineRows.classList.add('equation-group-spaced', 'equation-group-start-spaced');
+    splineRows.parentElement.classList.add('equation-scroll-end-spaced');
     result.intervals.forEach((interval, index) => {
       if (interval.containsTarget) targetInterval = interval;
       const leftPoint = sortedPoints.find(point => point.x === interval.xStart);
@@ -300,6 +305,7 @@ function displayResults(result, points) {
       const targetText = formatNumber(result.targetX);
       const evaluated = addResultSection('Final Result');
       const evaluatedRows = mathGroup(evaluated);
+      evaluatedRows.classList.add('equation-group-start-spaced', 'equation-group-final-indent');
       const substitution = document.createElement('span');
       appendEquationAtom(substitution, '', mathText(`(${formatNumber(leftPoint.y)})`));
       appendEquationAtom(substitution, '+', mathText(`(${formatNumber(targetInterval.slope)}) (${targetText} − ${formatNumber(targetInterval.xStart)})`));

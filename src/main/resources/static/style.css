@@ -96,8 +96,11 @@ tbody tr:hover .delete-row, .delete-row:focus-visible { opacity: 1; transform: t
 .equation-group-wrap .equation-atom { display: inline-block; white-space: nowrap; }
 .equation-group-wrap .equation-atom * { white-space: nowrap; }
 .equation-group-spaced { row-gap: .75em; }
+.equation-group-start-spaced { margin-block-start: .75lh; }
+.equation-scroll-end-spaced { padding-block-end: .75lh; line-height: 1.65; }
+.equation-group-wrap.equation-group-final-indent { box-sizing: border-box; padding-inline-start: 1.5em; }
 .lagrange-basis-list { display: flex; width: max-content; min-width: max-content; flex-direction: column; align-items: flex-start; gap: .75em; }
-.lagrange-basis-entry { row-gap: 0; }
+.lagrange-basis-entry { grid-template-columns: 1.75em 1.1em max-content; row-gap: 0; }
 .equation-cell { min-width: 0; white-space: nowrap; }
 .equation-cell * { white-space: nowrap; }
 .equation-lhs { text-align: right; }
