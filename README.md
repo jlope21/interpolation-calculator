@@ -4,6 +4,10 @@
 
 Interpolation Calculator is a web-based application for estimating values from a set of data points using numerical interpolation methods. Users enter X and Y coordinates, choose a method, and optionally evaluate the interpolation at a target X value.
 
+### Live Demo
+
+[Open Interpolation Calculator](https://interpolation-calculator.onrender.com/)
+
 ## 2. Features
 
 - **Newton interpolation** with Linear, Quadratic, and Polynomial methods.
@@ -16,7 +20,7 @@ Interpolation Calculator is a web-based application for estimating values from a
 - View method-specific results: Newton coefficients and polynomial equations, Lagrange basis functions and interpolation results, or spline interval functions and results.
 - Keyboard navigation in the data table and Ctrl+Z undo for table edits.
 
-Newton and Lagrange Linear methods require exactly two selected points; Quadratic requires exactly three; Polynomial accepts two or more. Spline supports the Linear method and requires at least two points. A target value for a spline must lie within the selected X range.
+Newton and Lagrange Linear methods require exactly two selected points; Quadratic requires exactly three; Polynomial accepts two or more. All methods require at least two selected points. Spline supports only the Linear method, and a supplied target X must lie within the selected X range. Selected X values must be unique.
 
 ## 3. Technologies Used
 
@@ -31,9 +35,13 @@ Newton and Lagrange Linear methods require exactly two selected points; Quadrati
 
 ```text
 .
+├── .dockerignore
+├── .gitignore
 ├── .mvn/
 │   └── wrapper/
 │       └── maven-wrapper.properties
+├── Dockerfile
+├── README.md
 ├── mvnw
 ├── mvnw.cmd
 ├── pom.xml
@@ -66,8 +74,11 @@ Newton and Lagrange Linear methods require exactly two selected points; Quadrati
     │           ├── script.js
     │           └── style.css
     └── test/java/com/example/lagrange/
+        ├── algorithm/
+        │   └── InterpolationAlgorithmTest.java
         ├── LagrangeApplicationTests.java
-        └── service/InterpolationServiceTest.java
+        └── service/
+            └── InterpolationServiceTest.java
 ```
 
 ## 5. Prerequisites
@@ -78,6 +89,8 @@ Newton and Lagrange Linear methods require exactly two selected points; Quadrati
 The project includes Maven Wrapper scripts, which can run the build without a separately installed Maven command.
 
 ## 6. How to Run the Project
+
+The following instructions are for local development.
 
 From the project root, start the application with the appropriate command for your operating system.
 
@@ -97,7 +110,7 @@ When the application has started, open [http://localhost:8080](http://localhost:
 
 ## 7. How to Use
 
-1. Open the application at [http://localhost:8080](http://localhost:8080).
+1. Open the [Live Demo](https://interpolation-calculator.onrender.com/).
 2. Enter X and Y values in the data-point table. Add rows as needed and select the points to include.
 3. Select an interpolation mode and one of its available methods.
 4. Enter a Target X value if an evaluated result is needed. The field may be left empty to view method equations without evaluating at a target.
